@@ -1,0 +1,12 @@
+Configuration:
+  name: Default
+
+  Appenders:
+    Console:
+      name: STDOUT
+
+  Loggers:
+    Root:
+      level: info
+      AppenderRef:
+        ref: STDOUT

@@ -8,12 +8,22 @@ repositories {
 
 dependencies {
     compile 'com.beust:jcommander:1.71'
+    compileOnly 'org.projectlombok:lombok:1.16.18'
+    compile 'io.github.openfeign:feign-core:9.5.0'
+    compile 'io.github.openfeign:feign-gson:9.5.0'
+    compile 'io.github.openfeign:feign-slf4j:9.5.0'
+    compile 'org.slf4j:slf4j-api:1.7.25'
+    compile 'org.apache.logging.log4j:log4j-api:2.8.2'
+    compile 'org.apache.logging.log4j:log4j-core:2.8.2'
+    compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.8.2'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.8.8'
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.8.8'
 }
 
 mainClassName = 'org.cloudgarden.dribbbletoplikers.Launcher'
 
 run {
-    if(project.hasProperty('execArgs')) {
+    if (project.hasProperty('execArgs')) {
         args execArgs.split()
     }
 }
