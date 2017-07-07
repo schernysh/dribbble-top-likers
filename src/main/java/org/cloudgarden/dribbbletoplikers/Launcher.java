@@ -48,16 +48,21 @@ public class Launcher {
     }
 
     private void run() {
-        final DribbbleApi api = DribbbleApi.connect("https://api.dribbble.com/v1", clientAccessToken);
+        try {
+            final DribbbleApi api = DribbbleApi.connect("https://api.dribbble.com/v1", clientAccessToken);
 
-        final Map<String, Long> likers = new ForkJoinPool(10).invoke(new UserTask(api, userId));
+            final Map<String, Long> likers = new ForkJoinPool(10).invoke(new UserTask(api, userId));
 
-        log.info("Top {} likers:", topNum);
+            log.info("Top {} likers:", topNum);
 
-        likers.entrySet().stream()
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                .limit(topNum)
-                .forEach(e -> log.info("{}: {}", e.getKey(), e.getValue()));
+            likers.entrySet().stream()
+                    .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                    .limit(topNum)
+                    .forEach(e -> log.info("{}: {}", e.getKey(), e.getValue()));
+        } catch (Exception e) {
+            log.error("Unexpected exception occurred:", e);
+            System.exit(255);
+        }
     }
 
     @RequiredArgsConstructor

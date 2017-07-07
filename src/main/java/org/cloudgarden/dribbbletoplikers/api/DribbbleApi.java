@@ -13,14 +13,10 @@ import org.cloudgarden.dribbbletoplikers.model.User;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static feign.Util.RETRY_AFTER;
-import static feign.Util.emptyToNull;
+import static feign.Util.*;
 import static java.util.Collections.singletonList;
 
 /**
@@ -56,9 +52,9 @@ public interface DribbbleApi {
                     public Exception decode(String methodKey, Response response) {
                         // rate limiting handling
                         // set Retry-After header before delegating to default error decoder to trigger Feign retry mechanism
-                        final String dateHeader = response.headers().get("Date").iterator().next();
-                        final String rateLimitResetHeader = response.headers().get("X-RateLimit-Reset").iterator().next();
-                        if (response.status() == 429 && emptyToNull(dateHeader) != null && emptyToNull(rateLimitResetHeader) != null) {
+                        final String dateHeader = firstHeaderOrNull(response, "Date");
+                        final String rateLimitResetHeader = firstHeaderOrNull(response, "X-RateLimit-Reset");
+                        if (response.status() == 429 && dateHeader != null && rateLimitResetHeader != null) {
                             final long rateLimitResetEpochSeconds = Long.parseLong(rateLimitResetHeader);
                             final long serverDateTimeEpochSeconds = ZonedDateTime.parse(dateHeader, DateTimeFormatter.RFC_1123_DATE_TIME).toEpochSecond();
                             final long retryAfterSeconds = rateLimitResetEpochSeconds - serverDateTimeEpochSeconds;
@@ -68,6 +64,11 @@ public interface DribbbleApi {
                             response = response.toBuilder().headers(headers).build();
                         }
                         return super.decode(methodKey, response);
+                    }
+
+                    private String firstHeaderOrNull(Response response, String headerName) {
+                        final Iterator<String> iterator = valuesOrEmpty(response.headers(), headerName).iterator();
+                        return iterator.hasNext() ? emptyToNull(iterator.next()) : null;
                     }
                 })
                 .target(DribbbleApi.class, baseUrl);
